@@ -1,0 +1,171 @@
+.prediction-panel {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.panel-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+}
+
+.prediction-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.location-select,
+.timeframe-select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  font-size: 0.9rem;
+}
+
+.predict-btn {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  min-width: 100px;
+}
+
+.predictions-list {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.no-predictions {
+  text-align: center;
+  padding: 40px 20px;
+  color: #7f8c8d;
+}
+
+.prediction-item {
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 15px;
+  background: #fafafa;
+}
+
+.prediction-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.location-info h4 {
+  margin: 0 0 5px 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.timeframe {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+.prediction-metrics {
+  display: flex;
+  gap: 20px;
+}
+
+.congestion-metric,
+.confidence-metric {
+  text-align: center;
+}
+
+.congestion-value,
+.confidence-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  color: #7f8c8d;
+  text-transform: uppercase;
+}
+
+.recommendations {
+  margin-bottom: 15px;
+}
+
+.recommendations h5 {
+  margin: 0 0 8px 0;
+  color: #2c3e50;
+  font-size: 0.95rem;
+}
+
+.recommendations ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.recommendations li {
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.prediction-factors {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.factor {
+  background: #ecf0f1;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  color: #2c3e50;
+}
+
+.prediction-time {
+  font-size: 0.8rem;
+  color: #95a5a6;
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .panel-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .prediction-controls {
+    justify-content: center;
+  }
+  
+  .prediction-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .prediction-metrics {
+    justify-content: center;
+  }
+  
+  .prediction-factors {
+    justify-content: center;
+  }
+}

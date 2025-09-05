@@ -3,11 +3,12 @@ import { useTraffic } from '../../contexts/TrafficContext';
 import LiveTrafficMap from '../../components/traffic/LiveTrafficMap/LiveTrafficMap';
 import TrafficChart from '../../components/traffic/TrafficChart/TrafficChart';
 import IncidentList from '../../components/traffic/IncidentList/IncidentList';
+import PredictionPanel from '../../components/traffic/PredictionPanel/PredictionPanel';
 import './Dashboard.css';
 
 // Dashboard page showing traffic stats, map, chart, and recent incidents
 const Dashboard = () => {
-  const { trafficData, incidents, loading, error, realTimeUpdates, toggleRealTimeUpdates } = useTraffic();
+  const { trafficData, incidents, predictions, loading, error, realTimeUpdates, toggleRealTimeUpdates } = useTraffic();
 
   // Show loading state
   if (loading) {
@@ -21,6 +22,7 @@ const Dashboard = () => {
   const averageCongestion = trafficData.length > 0 
     ? Math.round(trafficData.reduce((sum, data) => sum + data.congestion, 0) / trafficData.length) 
     : 0;
+  const latestPrediction = predictions.length > 0 ? predictions[0] : null;
 
   return (
     <div className="dashboard">
@@ -61,11 +63,18 @@ const Dashboard = () => {
           <div className="stat-value">{resolvedIncidents}</div>
           <div className="stat-label">Resolved Incidents</div>
         </div>
+        <div className="stat-card">
+          <div className="stat-value">
+            {latestPrediction ? `${latestPrediction.predictedCongestion}%` : 'N/A'}
+          </div>
+          <div className="stat-label">AI Prediction</div>
+        </div>
       </div>
       <div className="dashboard-content">
         <div className="main-content">
           <LiveTrafficMap />
           <TrafficChart />
+          <PredictionPanel />
         </div>
         <div className="sidebar-content">
           <IncidentList limit={5} showViewAll={true} />

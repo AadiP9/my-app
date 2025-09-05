@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTraffic } from '../../contexts/TrafficContext';
 import LiveTrafficMap from '../../components/traffic/LiveTrafficMap/LiveTrafficMap';
 import IncidentList from '../../components/traffic/IncidentList/IncidentList';
+import RouteOptimizer from '../../components/traffic/RouteOptimizer/RouteOptimizer';
 import './TrafficManagement.css';
 
 const TrafficManagement = () => {
@@ -68,6 +69,7 @@ const TrafficManagement = () => {
       <div className="management-content">
         <div className="map-section">
           <LiveTrafficMap />
+          <RouteOptimizer />
         </div>
         
         <div className="incident-section">

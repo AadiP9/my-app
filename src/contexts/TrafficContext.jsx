@@ -1,6 +1,12 @@
 // src/contexts/TrafficContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { fetchTrafficData, subscribeToTrafficUpdates, fetchIncidents } from '../services/database';
+import { 
+  fetchTrafficData, 
+  subscribeToTrafficUpdates, 
+  fetchIncidents,
+  fetchPredictions
+} from '../services/database';
+import { runTrafficPrediction, optimizeRoute } from '../services/functions';
 
 const TrafficContext = createContext();
 
@@ -15,6 +21,8 @@ export const useTraffic = () => {
 export const TrafficProvider = ({ children }) => {
   const [trafficData, setTrafficData] = useState([]);
   const [incidents, setIncidents] = useState([]);
+  const [predictions, setPredictions] = useState([]);
+  const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [realTimeUpdates, setRealTimeUpdates] = useState(false);
   const [error, setError] = useState(null);
@@ -54,13 +62,15 @@ export const TrafficProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      const [trafficResponse, incidentsResponse] = await Promise.all([
+      const [trafficResponse, incidentsResponse, predictionsResponse] = await Promise.all([
         fetchTrafficData(),
-        fetchIncidents()
+        fetchIncidents(),
+        fetchPredictions()
       ]);
       
       setTrafficData(trafficResponse.documents);
       setIncidents(incidentsResponse.documents);
+      setPredictions(predictionsResponse.documents);
     } catch (error) {
       console.error('Error loading initial data:', error);
       setError('Failed to load data. Using demo data instead.');
@@ -89,6 +99,17 @@ export const TrafficProvider = ({ children }) => {
           type: 'accident', 
           severity: 'high',
           $createdAt: new Date().toISOString()
+        }
+      ]);
+      setPredictions([
+        {
+          $id: 'demo-prediction-1',
+          location: 'Downtown',
+          predictedCongestion: 85,
+          timeframe: '2 hours',
+          confidence: 92,
+          recommendations: ['Use alternate routes', 'Increase public transport frequency'],
+          $createdAt: new Date().toISOString(),
         }
       ]);
     } finally {
@@ -141,6 +162,28 @@ export const TrafficProvider = ({ children }) => {
     }
   };
 
+  const generatePrediction = async (location, timeframe = '1 hour') => {
+    try {
+      const prediction = await runTrafficPrediction(location, timeframe);
+      setPredictions(prev => [prediction, ...prev.slice(0, 9)]); // Keep last 10 predictions
+      return prediction;
+    } catch (error) {
+      console.error('Error generating prediction:', error);
+      throw error;
+    }
+  };
+
+  const findOptimalRoute = async (origin, destination, preferences = {}) => {
+    try {
+      const optimizedRoutes = await optimizeRoute(origin, destination, preferences);
+      setRoutes(optimizedRoutes);
+      return optimizedRoutes;
+    } catch (error) {
+      console.error('Error finding optimal route:', error);
+      throw error;
+    }
+  };
+
   const toggleRealTimeUpdates = () => {
     setRealTimeUpdates(prev => !prev);
   };
@@ -148,12 +191,16 @@ export const TrafficProvider = ({ children }) => {
   const value = {
     trafficData,
     incidents,
+    predictions,
+    routes,
     loading,
     realTimeUpdates,
     error,
     addIncident,
     updateIncident,
     deleteIncident,
+    generatePrediction,
+    findOptimalRoute,
     toggleRealTimeUpdates,
     refreshData: loadInitialData
   };

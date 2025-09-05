@@ -1,14 +1,22 @@
 // src/services/database.js
 import { Databases } from 'appwrite';
-import { client } from './appwrite';
+import { 
+  client, 
+  APPWRITE_DATABASE,
+  APPWRITE_TRAFFIC_COLLECTION,
+  APPWRITE_INCIDENTS_COLLECTION,
+  APPWRITE_PREDICTIONS_COLLECTION,
+  APPWRITE_ROUTES_COLLECTION
+} from './appwrite';
 
 const databases = new Databases(client);
 
-// Read collection / database IDs from environment (Vite)
-const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE || 'trafficDB';
-const TRAFFIC_COLLECTION_ID = import.meta.env.VITE_APPWRITE_TRAFFIC_COLLECTION || 'trafficData';
-const INCIDENTS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_INCIDENTS_COLLECTION || 'incidents';
-const USERS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_USERS_COLLECTION || 'users';
+// Use the imported constants
+const DATABASE_ID = APPWRITE_DATABASE;
+const TRAFFIC_COLLECTION_ID = APPWRITE_TRAFFIC_COLLECTION;
+const INCIDENTS_COLLECTION_ID = APPWRITE_INCIDENTS_COLLECTION;
+const PREDICTIONS_COLLECTION_ID = APPWRITE_PREDICTIONS_COLLECTION;
+const ROUTES_COLLECTION_ID = APPWRITE_ROUTES_COLLECTION;
 
 // Traffic Data Operations
 export const fetchTrafficData = async () => {
@@ -96,6 +104,70 @@ export const deleteIncident = async (id) => {
     console.error('Error deleting incident:', error);
     // For development, return a mock response
     return { $id: id };
+  }
+};
+
+// Predictions Operations
+export const fetchPredictions = async () => {
+  try {
+    return await databases.listDocuments(DATABASE_ID, PREDICTIONS_COLLECTION_ID);
+  } catch (error) {
+    console.error('Error fetching predictions:', error);
+    return {
+      documents: [
+        {
+          $id: 'mock-prediction-1',
+          location: 'Downtown',
+          predictedCongestion: 85,
+          timeframe: '2 hours',
+          confidence: 92,
+          recommendations: ['Use alternate routes', 'Increase public transport frequency'],
+          $createdAt: new Date().toISOString(),
+        },
+      ],
+    };
+  }
+};
+
+export const createPrediction = async (data) => {
+  try {
+    return await databases.createDocument(DATABASE_ID, PREDICTIONS_COLLECTION_ID, 'unique()', data);
+  } catch (error) {
+    console.error('Error creating prediction:', error);
+    return { $id: `mock-prediction-${Date.now()}`, ...data };
+  }
+};
+
+// Routes Operations
+export const fetchOptimalRoutes = async (origin, destination) => {
+  try {
+    return await databases.listDocuments(DATABASE_ID, ROUTES_COLLECTION_ID);
+  } catch (error) {
+    console.error('Error fetching routes:', error);
+    return {
+      documents: [
+        {
+          $id: 'mock-route-1',
+          origin,
+          destination,
+          distance: '12.5 km',
+          estimatedTime: '25 minutes',
+          congestionLevel: 'medium',
+          alternativeRoutes: 2,
+          publicTransportOptions: ['Bus Route 42', 'Metro Line 3'],
+          $createdAt: new Date().toISOString(),
+        },
+      ],
+    };
+  }
+};
+
+export const createRoute = async (data) => {
+  try {
+    return await databases.createDocument(DATABASE_ID, ROUTES_COLLECTION_ID, 'unique()', data);
+  } catch (error) {
+    console.error('Error creating route:', error);
+    return { $id: `mock-route-${Date.now()}`, ...data };
   }
 };
 
