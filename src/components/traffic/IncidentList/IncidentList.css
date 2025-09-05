@@ -1,0 +1,118 @@
+.incident-list-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.incident-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.incident-header h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.filter-select {
+  padding: 5px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.incident-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.incident-item {
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.incident-main {
+  flex: 1;
+}
+
+.incident-title {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #2c3e50;
+}
+
+.incident-location {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  margin-bottom: 5px;
+}
+
+.incident-description {
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+.incident-time {
+  font-size: 0.8rem;
+  color: #95a5a6;
+}
+
+.incident-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.status-select {
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.btn-small {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.badge-active {
+  background-color: #ffeaa7;
+  color: #d35400;
+}
+
+.badge-investigating {
+  background-color: #81ecec;
+  color: #00cec9;
+}
+
+.badge-resolved {
+  background-color: #55efc4;
+  color: #00b894;
+}
+
+.no-incidents {
+  text-align: center;
+  padding: 20px;
+  color: #7f8c8d;
+}
+
+.view-all-container {
+  margin-top: 15px;
+  text-align: center;
+}
