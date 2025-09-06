@@ -26,12 +26,18 @@ export const AuthProvider = ({ children }) => {
   const checkUserStatus = async () => {
     try {
       setLoading(true);
+      // Test connection first
       const userData = await account.get();
       setUser(userData);
     } catch (error) {
-      // Handle 401 error gracefully - it means no active session
+      // Handle different error types gracefully
       if (error.code === 401) {
+        // 401 means no active session - this is normal
         console.log('No active session found');
+        setUser(null);
+      } else if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+        // Network/connection error - use offline mode
+        console.warn('Cannot connect to Appwrite backend. Running in offline mode.');
         setUser(null);
       } else {
         console.error('Error checking user status:', error);
@@ -46,7 +52,7 @@ export const AuthProvider = ({ children }) => {
     try {
       // Check if this is demo credentials for fallback auth
       if (email === 'admin@traffic.com' && password === 'demo123') {
-        // Create a mock user for demo purposes when Appwrite is not accessible
+        console.log('Using demo authentication');
         const mockUser = {
           $id: 'demo-user-id',
           name: 'Demo Admin',
@@ -62,38 +68,39 @@ export const AuthProvider = ({ children }) => {
         return { success: true };
       }
 
-      // Create email session using Appwrite SDK
-      await account.createEmailPasswordSession(email, password);
-      
-      // Get user data after successful login
-      const userData = await account.get();
-      setUser(userData);
-      return { success: true };
+      try {
+        // Try Appwrite authentication
+        await account.createEmailPasswordSession(email, password);
+        const userData = await account.get();
+        setUser(userData);
+        return { success: true };
+      } catch (appwriteError) {
+        // If network error and demo credentials, use fallback
+        if ((appwriteError.message === 'Failed to fetch' || appwriteError.name === 'TypeError') && 
+            email === 'admin@traffic.com' && password === 'demo123') {
+          console.log('Network error detected, using demo authentication fallback');
+          const mockUser = {
+            $id: 'demo-user-id',
+            name: 'Demo Admin',
+            email: 'admin@traffic.com',
+            emailVerification: true,
+            status: true,
+            labels: [],
+            prefs: {},
+            accessedAt: new Date().toISOString(),
+            registration: new Date().toISOString()
+          };
+          setUser(mockUser);
+          return { success: true };
+        }
+        throw appwriteError;
+      }
     } catch (error) {
       console.error('Login error:', error);
-      
-      // If it's a network error and using demo credentials, fall back to mock auth
-      if (error.message === 'Failed to fetch' && email === 'admin@traffic.com' && password === 'demo123') {
-        console.log('Falling back to demo authentication due to network error');
-        const mockUser = {
-          $id: 'demo-user-id',
-          name: 'Demo Admin',
-          email: 'admin@traffic.com',
-          emailVerification: true,
-          status: true,
-          labels: [],
-          prefs: {},
-          accessedAt: new Date().toISOString(),
-          registration: new Date().toISOString()
-        };
-        setUser(mockUser);
-        return { success: true };
-      }
-      
       return { 
         success: false, 
-        error: error.message === 'Failed to fetch' 
-          ? 'Unable to connect to server. Please check your internet connection or try again later.'
+        error: (error.message === 'Failed to fetch' || error.name === 'TypeError')
+          ? 'Unable to connect to server. Try demo credentials: admin@traffic.com / demo123'
           : error.message || 'Login failed. Please try again.' 
       };
     }
@@ -101,7 +108,10 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await account.deleteSession('current');
+      // Only try to delete session if we have a real user (not demo)
+      if (user && user.$id !== 'demo-user-id') {
+        await account.deleteSession('current');
+      }
       setUser(null);
       return { success: true };
     } catch (error) {
