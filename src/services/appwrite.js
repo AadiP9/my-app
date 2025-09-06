@@ -13,9 +13,17 @@ const APPWRITE_ROUTES_COLLECTION = import.meta.env.VITE_APPWRITE_ROUTES_COLLECTI
 
 const client = new Client();
 
-client
-  .setEndpoint(APPWRITE_ENDPOINT)
-  .setProject(APPWRITE_PROJECT);
+try {
+  client
+    .setEndpoint(APPWRITE_ENDPOINT)
+    .setProject(APPWRITE_PROJECT);
+  
+  console.log('Appwrite client configured successfully');
+  console.log('Endpoint:', APPWRITE_ENDPOINT);
+  console.log('Project:', APPWRITE_PROJECT);
+} catch (error) {
+  console.error('Failed to configure Appwrite client:', error);
+}
 
 export { client };
 
