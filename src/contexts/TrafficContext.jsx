@@ -26,6 +26,7 @@ export const TrafficProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [realTimeUpdates, setRealTimeUpdates] = useState(false);
   const [error, setError] = useState(null);
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
 
   useEffect(() => {
     loadInitialData();
@@ -62,6 +63,7 @@ export const TrafficProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
+      setIsOfflineMode(false);
       const [trafficResponse, incidentsResponse, predictionsResponse] = await Promise.all([
         fetchTrafficData(),
         fetchIncidents(),
@@ -73,7 +75,8 @@ export const TrafficProvider = ({ children }) => {
       setPredictions(predictionsResponse.documents);
     } catch (error) {
       console.error('Error loading initial data:', error);
-      setError('Failed to load data. Using demo data instead.');
+      setError('Backend unavailable. Running in offline mode with demo data.');
+      setIsOfflineMode(true);
       // Set some demo data
       setTrafficData([
         { 
@@ -137,6 +140,12 @@ export const TrafficProvider = ({ children }) => {
 
   const updateIncident = async (incidentId, patch) => {
     try {
+      if (isOfflineMode) {
+        // In offline mode, just update locally
+        setIncidents(prev => prev.map(i => (i.$id === incidentId ? { ...i, ...patch } : i)));
+        return { $id: incidentId, ...patch };
+      }
+      
       const res = await (await import('../services/database')).updateIncident(incidentId, patch);
       const updated = res.document || res;
       setIncidents(prev => prev.map(i => (i.$id === incidentId ? { ...i, ...updated } : i)));
@@ -144,7 +153,12 @@ export const TrafficProvider = ({ children }) => {
       return updated;
     } catch (err) {
       console.error('updateIncident error:', err);
-      setError(`Failed to update incident: ${err.message}`);
+      if (err.message.includes('Backend connection unavailable')) {
+        setError('Backend unavailable. Changes saved locally only.');
+        setIsOfflineMode(true);
+      } else {
+        setError(`Failed to update incident: ${err.message}`);
+      }
       // best-effort local update
       setIncidents(prev => prev.map(i => (i.$id === incidentId ? { ...i, ...patch } : i)));
       return { $id: incidentId, ...patch };
@@ -153,11 +167,21 @@ export const TrafficProvider = ({ children }) => {
 
   const deleteIncident = async (incidentId) => {
     try {
+      if (isOfflineMode) {
+        // In offline mode, just delete locally
+        setIncidents(prev => prev.filter(incident => incident.$id !== incidentId));
+        return { $id: incidentId };
+      }
+      
       await (await import('../services/database')).deleteIncident(incidentId);
       setIncidents(prev => prev.filter(incident => incident.$id !== incidentId));
       return { $id: incidentId };
     } catch (err) {
       console.error('deleteIncident error:', err);
+      if (err.message.includes('Backend connection unavailable')) {
+        setError('Backend unavailable. Changes saved locally only.');
+        setIsOfflineMode(true);
+      }
       // local fallback
       setIncidents(prev => prev.filter(incident => incident.$id !== incidentId));
       return { $id: incidentId };
@@ -198,6 +222,7 @@ export const TrafficProvider = ({ children }) => {
     loading,
     realTimeUpdates,
     error,
+    isOfflineMode,
     addIncident,
     updateIncident,
     deleteIncident,

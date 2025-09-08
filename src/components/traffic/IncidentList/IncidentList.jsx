@@ -3,7 +3,7 @@ import { useTraffic } from '../../../contexts/TrafficContext';
 import './IncidentList.css';
 
 const IncidentList = ({ limit, showViewAll }) => {
-  const { incidents, deleteIncident, updateIncident } = useTraffic();
+  const { incidents, deleteIncident, updateIncident, error, isOfflineMode } = useTraffic();
   const [filter, setFilter] = useState('all');
 
   const filteredIncidents = incidents.filter(incident => {
@@ -48,6 +48,23 @@ const IncidentList = ({ limit, showViewAll }) => {
 
   return (
     <div className="incident-list-container">
+      {error && (
+        <div className="error-banner" style={{
+          backgroundColor: isOfflineMode ? '#fff3cd' : '#f8d7da',
+          color: isOfflineMode ? '#856404' : '#721c24',
+          padding: '10px',
+          marginBottom: '15px',
+          borderRadius: '4px',
+          border: `1px solid ${isOfflineMode ? '#ffeaa7' : '#f5c6cb'}`
+        }}>
+          {isOfflineMode ? '⚠️ ' : '❌ '}{error}
+          {isOfflineMode && (
+            <div style={{ fontSize: '0.9em', marginTop: '5px' }}>
+              To connect to backend: Check your .env file and run 'npm run setup-db'
+            </div>
+          )}
+        </div>
+      )}
       <div className="incident-header">
         <h3>Traffic Incidents</h3>
         <div className="filter-controls">
