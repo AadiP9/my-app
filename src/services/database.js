@@ -138,11 +138,16 @@ export const createIncident = async (data) => {
 
 export const updateIncident = async (id, data) => {
   try {
+    const isConnected = await checkConnection();
+    if (!isConnected) {
+      throw new Error('Backend connection unavailable. Please check your internet connection.');
+    }
+    
     return await databases.updateDocument(DATABASE_ID, INCIDENTS_COLLECTION_ID, id, data);
   } catch (error) {
     console.error('Error updating incident:', error);
-    // Return a best-effort merged object for dev
-    return { $id: id, ...data };
+    // Re-throw the error so the calling context knows about the failure
+    throw error;
   }
 };
 

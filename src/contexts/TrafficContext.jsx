@@ -140,9 +140,11 @@ export const TrafficProvider = ({ children }) => {
       const res = await (await import('../services/database')).updateIncident(incidentId, patch);
       const updated = res.document || res;
       setIncidents(prev => prev.map(i => (i.$id === incidentId ? { ...i, ...updated } : i)));
+      setError(null); // Clear any previous errors on success
       return updated;
     } catch (err) {
       console.error('updateIncident error:', err);
+      setError(`Failed to update incident: ${err.message}`);
       // best-effort local update
       setIncidents(prev => prev.map(i => (i.$id === incidentId ? { ...i, ...patch } : i)));
       return { $id: incidentId, ...patch };
